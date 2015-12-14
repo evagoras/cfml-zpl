@@ -1,5 +1,12 @@
 <p>This is an example of how to print some ZPL data to a network as well as to a computer-connected label printer.</p>
 
+<cfscript>
+// set variables to be used in the ZPL
+stockcode = "32435436546";
+bin = "ABV653";
+quantity = 10;
+</cfscript>
+
 <cfsavecontent variable="zplData">
 <cfoutput>
 <!--- start of label format --->
@@ -16,21 +23,21 @@
 <!--- underline --->
 ^FO42,110 ^GB748,0,2 ^FS
 <!--- barcode --->
-^FO52,160 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.stockcode)# ^FS
+^FO52,160 ^BY1,1.0 ^B3N,,200,N ^FD#trim(stockcode)# ^FS
 <!--- actual stockcode --->
-^FO52,380 ^A0N,36 ^FB728,2 ^FD#trim(ARGUMENTS.stockcode)# ^FS
+^FO52,380 ^A0N,36 ^FB728,2 ^FD#trim(stockcode)# ^FS
 
 <!--- BIN header --->
 ^FO52,550 ^A0N,36 ^FDBIN ^FS
 <!--- underline --->
 ^FO42,590 ^GB748,0,2 ^FS
 <!--- barcode --->
-^FO52,640 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.bin)# ^FS
+^FO52,640 ^BY1,1.0 ^B3N,,200,N ^FD#trim(bin)# ^FS
 <!--- actual bin --->
-^FO52,860 ^A0N,36 ^FD#trim(ARGUMENTS.bin)# ^FS
+^FO52,860 ^A0N,36 ^FD#trim(bin)# ^FS
 
 <!--- print quantity --->
-^PQ#ARGUMENTS.quantity#
+^PQ#quantity#
 
 <!--- print rate per second --->
 ^PR6
