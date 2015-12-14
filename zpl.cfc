@@ -2,7 +2,7 @@
 
 
 <cfscript>
-public any function printToIpPrinter
+public any function printToNetworkPrinter
 (
 	required string ip,
 	required numeric port,
