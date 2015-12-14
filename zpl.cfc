@@ -1,47 +1,41 @@
 <cfcomponent output="false">
 
 
-<cffunction name="GetDetails" access="public" returntype="query" output="false">
-	<cfargument name="printer_id" type="string" required="false" default="" />
-	<cfargument name="printer_name" type="string" required="false" default="" />
-	<cfargument name="printer_unc_path" type="string" required="false" default="" />
-	
-	<cfset var qResults = queryNew("") />
-	
-	<cfquery name="qResults">
-		SELECT * 
-		FROM dbo.printers WITH(NOLOCK) 
-		WHERE 
-			1 = 1 
-			<cfif len( ARGUMENTS.printer_id )>
-				AND id = <cfqueryparam cfsqltype="cf_sql_integer" value="#ARGUMENTS.printer_id#" /> 
-			<cfelse>
-				AND isDefault = <cfqueryparam cfsqltype="cf_sql_bit" value="1" /> 
-			</cfif>
-			<cfif len( ARGUMENTS.printer_name )>
-				AND printer_name = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_name#" /> 
-			</cfif>
-			<cfif len( ARGUMENTS.printer_unc_path )>
-				AND printer_unc_path = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_unc_path#" /> 
-			</cfif>
-	</cfquery>
-	
-	<cfreturn qResults />
-</cffunction>
+<cfscript>
+public any function printToIpPrinter
+(
+	required string ip,
+	required numeric port,
+	string zpl=""
+)
+{
+	// open and init java socket connection
+	var sock = createObject( "java", "java.net.Socket" );
+	sock.init( arguments.ip, arguments.port );
+
+	// socket is open and ready to receive
+	var connected = sock.isConnected();
+
+	if ( connected ) {
+		// create an output stream buffer for writing out the ZPL
+		var streamOut = sock.getOutputStream();
+		var output = createObject("java", "java.io.DataOutputStream").init( streamOut );
+		streamOut.flush();
+		// send the ZPL by writing to the output buffer
+		output.writeBytes( arguments.zpl );
+		streamOut.flush();
+	}
+
+	// close down and clean up the socket connection
+	sock.shutdownOutput();
+	sock.close();
+
+	return connected;
+}
+</cfscript>
 
 
-<cffunction name="GetDefault" access="public" returntype="query" output="false">
-	<cfset var qResults = queryNew("") />
-	
-	<cfset qResults = GetDetails(
-		is_default = true
-		) />
-	
-	<cfreturn qResults />
-</cffunction>
-
-
-<cffunction name="Print" access="public" returntype="any" output="false">
+<cffunction name="printToConnectedPrinter" access="public" returntype="any" output="false">
 	<cfargument name="zpldata" type="string" required="true" default="" />
 	<cfargument name="printer_id" type="string" required="false" default="" />
 	<cfargument name="printer_unc_path" type="string" required="false" default="" />
@@ -98,6 +92,46 @@
 	</cftry>
 	
 	<cfreturn LOCAL.cError />
+</cffunction>
+
+
+<cffunction name="GetDetails" access="public" returntype="query" output="false">
+	<cfargument name="printer_id" type="string" required="false" default="" />
+	<cfargument name="printer_name" type="string" required="false" default="" />
+	<cfargument name="printer_unc_path" type="string" required="false" default="" />
+	
+	<cfset var qResults = queryNew("") />
+	
+	<cfquery name="qResults">
+		SELECT * 
+		FROM dbo.printers WITH(NOLOCK) 
+		WHERE 
+			1 = 1 
+			<cfif len( ARGUMENTS.printer_id )>
+				AND id = <cfqueryparam cfsqltype="cf_sql_integer" value="#ARGUMENTS.printer_id#" /> 
+			<cfelse>
+				AND isDefault = <cfqueryparam cfsqltype="cf_sql_bit" value="1" /> 
+			</cfif>
+			<cfif len( ARGUMENTS.printer_name )>
+				AND printer_name = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_name#" /> 
+			</cfif>
+			<cfif len( ARGUMENTS.printer_unc_path )>
+				AND printer_unc_path = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_unc_path#" /> 
+			</cfif>
+	</cfquery>
+	
+	<cfreturn qResults />
+</cffunction>
+
+
+<cffunction name="GetDefault" access="public" returntype="query" output="false">
+	<cfset var qResults = queryNew("") />
+	
+	<cfset qResults = GetDetails(
+		is_default = true
+		) />
+	
+	<cfreturn qResults />
 </cffunction>
 
 
@@ -198,40 +232,6 @@ net use lpt1: /d</cfoutput></cfsavecontent>
 
 	<cfreturn loc.result />
 </cffunction>
-
-
-<cfscript>
-public any function sendToLabelPrinter
-(
-	required string ip,
-	required numeric port,
-	string zpl=""
-)
-{
-	// open and init java socket connection
-	var sock = createObject( "java", "java.net.Socket" );
-	sock.init( arguments.ip, arguments.port );
-
-	// socket is open and ready to receive
-	var connected = sock.isConnected();
-
-	if ( connected ) {
-		// create an output stream buffer for writing out the ZPL
-		var streamOut = sock.getOutputStream();
-		var output = createObject("java", "java.io.DataOutputStream").init( streamOut );
-		streamOut.flush();
-		// send the ZPL by writing to the output buffer
-		output.writeBytes( arguments.zpl );
-		streamOut.flush();
-	}
-
-	// close down and clean up the socket connection
-	sock.shutdownOutput();
-	sock.close();
-
-	return connected;
-}
-</cfscript>
 
 
 </cfcomponent>
