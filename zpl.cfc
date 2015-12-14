@@ -36,44 +36,34 @@ public any function printToNetworkPrinter
 
 
 <cffunction name="printToConnectedPrinter" access="public" returntype="any" output="false">
-	<cfargument name="zpldata" type="string" required="true" default="" />
-	<cfargument name="printer_id" type="string" required="false" default="" />
 	<cfargument name="printer_unc_path" type="string" required="false" default="" />
+	<cfargument name="zpldata" type="string" required="true" default="" />
 	
 	<cfset var LOCAL = structNew() />
 	
 	<cfset LOCAL.aArguments = arrayNew(1) />
-	<cfset LOCAL.qPrinterInfo = queryNew("") />
-	<cfset LOCAL.cZplDataAbsoluteFilePath = "" />
-	<cfset LOCAL.cZplBatchAbsoluteFilePath = "" />
-	<cfset LOCAL.cError = "" />
+	<cfset LOCAL.zplDataAbsoluteFilePath = "" />
+	<cfset LOCAL.zplBatchAbsoluteFilePath = "" />
+	<cfset LOCAL.errorMsg = "" />
 	
-	<cfif len( ARGUMENTS.printer_unc_path )>
-		<cfset LOCAL.qPrinterInfo = GetDetails( printer_unc_path = "#ARGUMENTS.printer_unc_path#" ) />
-	<cfelseif len( ARGUMENTS.printer_id )>
-		<cfset LOCAL.qPrinterInfo = GetDetails( printer_id = "#ARGUMENTS.printer_id#" ) />
-	<cfelse>
-		<cfset LOCAL.qPrinterInfo = GetDefault() />
-	</cfif>
+	<cfset LOCAL.zplBatchAbsoluteFilePath = _createBatchFile() />
 	
-	<cfset LOCAL.cZplBatchAbsoluteFilePath = _createBatchFile() />
-	
-	<<cfset LOCAL.cZplDataAbsoluteFilePath = _writeToZplFile( ARGUMENTS.zpldata ) />
+	<cfset LOCAL.zplDataAbsoluteFilePath = _writeToZplFile( ARGUMENTS.zpldata ) />
 	
 	<cftry>
 		
-		<cfset LOCAL.aArguments[1] = "#LOCAL.qPrinterInfo.printer_unc_path#" />
-		<cfset LOCAL.aArguments[2] = "#LOCAL.cZplDataAbsoluteFilePath#" />
+		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.printer_unc_path#" />
+		<cfset LOCAL.aArguments[2] = "#LOCAL.zplDataAbsoluteFilePath#" />
 		
 		<cfexecute variable="batchScriptOutput"
-			name="#LOCAL.cZplBatchAbsoluteFilePath#"
+			name="#LOCAL.zplBatchAbsoluteFilePath#"
 			arguments="#LOCAL.aArguments#"
 			timeout="15"
-			<!--- errorVariable="batchScriptError" --->
+			errorVariable="batchScriptError"
 			/>
 		
 		<cfif len( batchScriptError )>
-			<cfset LOCAL.cError = batchScriptError />
+			<cfset LOCAL.errorMsg = batchScriptError />
 		</cfif>
 		
 		<!---
@@ -91,47 +81,7 @@ public any function printToNetworkPrinter
 		
 	</cftry>
 	
-	<cfreturn LOCAL.cError />
-</cffunction>
-
-
-<cffunction name="GetDetails" access="public" returntype="query" output="false">
-	<cfargument name="printer_id" type="string" required="false" default="" />
-	<cfargument name="printer_name" type="string" required="false" default="" />
-	<cfargument name="printer_unc_path" type="string" required="false" default="" />
-	
-	<cfset var qResults = queryNew("") />
-	
-	<cfquery name="qResults">
-		SELECT * 
-		FROM dbo.printers WITH(NOLOCK) 
-		WHERE 
-			1 = 1 
-			<cfif len( ARGUMENTS.printer_id )>
-				AND id = <cfqueryparam cfsqltype="cf_sql_integer" value="#ARGUMENTS.printer_id#" /> 
-			<cfelse>
-				AND isDefault = <cfqueryparam cfsqltype="cf_sql_bit" value="1" /> 
-			</cfif>
-			<cfif len( ARGUMENTS.printer_name )>
-				AND printer_name = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_name#" /> 
-			</cfif>
-			<cfif len( ARGUMENTS.printer_unc_path )>
-				AND printer_unc_path = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ARGUMENTS.printer_unc_path#" /> 
-			</cfif>
-	</cfquery>
-	
-	<cfreturn qResults />
-</cffunction>
-
-
-<cffunction name="GetDefault" access="public" returntype="query" output="false">
-	<cfset var qResults = queryNew("") />
-	
-	<cfset qResults = GetDetails(
-		is_default = true
-		) />
-	
-	<cfreturn qResults />
+	<cfreturn LOCAL.errorMsg />
 </cffunction>
 
 
