@@ -32,6 +32,43 @@ public any function printToNetworkPrinter
 
 	return connected;
 }
+
+
+public any function printToConnectedPrinter
+(
+	required string uncPath,
+	string zpl = ""
+)
+{
+	var zplBatchAbsoluteFilePath = _createBatchFile();
+	var zplDataAbsoluteFilePath = _writeToZplFile( arguments.zpl );
+
+	var exeArgs = [];
+	var errorMsg = "";
+
+	try {
+
+		exeArgs[1] = arguments.uncPath;
+		exeArgs[2] = zplDataAbsoluteFilePath;
+
+		execute {
+			variable="batchScriptOutput",
+			name="#LOCAL.zplBatchAbsoluteFilePath#",
+			arguments="#LOCAL.aArguments#",
+			timeout="15",
+			errorVariable="batchScriptError",
+		}
+
+		if ( len( batchScriptError ) )
+			errorMsg = batchScriptError;
+			
+		catch {
+			rethrow();
+		}
+	}
+
+	return errorMsg;
+}
 </cfscript>
 
 
