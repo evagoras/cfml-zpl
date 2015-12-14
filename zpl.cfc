@@ -61,7 +61,7 @@ public any function printToConnectedPrinter
 
 		if ( len( batchScriptError ) )
 			errorMsg = batchScriptError;
-			
+
 		catch {
 			rethrow();
 		}
@@ -70,56 +70,6 @@ public any function printToConnectedPrinter
 	return errorMsg;
 }
 </cfscript>
-
-
-<cffunction name="printToConnectedPrinter" access="public" returntype="any" output="false">
-	<cfargument name="uncPath" type="string" required="false" default="" />
-	<cfargument name="zpldata" type="string" required="true" default="" />
-	
-	<cfset var LOCAL = structNew() />
-	
-	<cfset LOCAL.aArguments = arrayNew(1) />
-	<cfset LOCAL.zplDataAbsoluteFilePath = "" />
-	<cfset LOCAL.zplBatchAbsoluteFilePath = "" />
-	<cfset LOCAL.errorMsg = "" />
-	
-	<cfset LOCAL.zplBatchAbsoluteFilePath = _createBatchFile() />
-	
-	<cfset LOCAL.zplDataAbsoluteFilePath = _writeToZplFile( ARGUMENTS.zpldata ) />
-	
-	<cftry>
-		
-		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.uncPath#" />
-		<cfset LOCAL.aArguments[2] = "#LOCAL.zplDataAbsoluteFilePath#" />
-		
-		<cfexecute variable="batchScriptOutput"
-			name="#LOCAL.zplBatchAbsoluteFilePath#"
-			arguments="#LOCAL.aArguments#"
-			timeout="15"
-			errorVariable="batchScriptError"
-			/>
-		
-		<cfif len( batchScriptError )>
-			<cfset LOCAL.errorMsg = batchScriptError />
-		</cfif>
-		
-		<!---
-		<cfoutput>
-			SCRIPT OUTPUT:<br />
-			<cfdump var="#batchScriptOutput#" labl="Script Output" /><br />
-			ERRORS:<br />
-			<cfdump var="#batchScriptError#" labl="Errors" />
-		</cfoutput>
-		--->
-		
-		<cfcatch>                
-			<cfrethrow />        
-		</cfcatch>
-		
-	</cftry>
-	
-	<cfreturn LOCAL.errorMsg />
-</cffunction>
 
 
 <cffunction name="_writeToZplFile" access="private" returntype="string" output="false">
