@@ -36,7 +36,7 @@ public any function printToNetworkPrinter
 
 
 <cffunction name="printToConnectedPrinter" access="public" returntype="any" output="false">
-	<cfargument name="printer_unc_path" type="string" required="false" default="" />
+	<cfargument name="unc_path" type="string" required="false" default="" />
 	<cfargument name="zpldata" type="string" required="true" default="" />
 	
 	<cfset var LOCAL = structNew() />
@@ -52,7 +52,7 @@ public any function printToNetworkPrinter
 	
 	<cftry>
 		
-		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.printer_unc_path#" />
+		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.unc_path#" />
 		<cfset LOCAL.aArguments[2] = "#LOCAL.zplDataAbsoluteFilePath#" />
 		
 		<cfexecute variable="batchScriptOutput"
@@ -124,63 +124,6 @@ net use lpt1: /d</cfoutput></cfsavecontent>
 	</cfif>
 	
 	<cfreturn LOCAL.cAbsoluteFilePath />
-</cffunction>
-
-
-<cffunction name="PrintRestockingLabel" access="private" output="false" returntype="string">
-	<cfargument name="stockcode" type="string" required="true" />
-	<cfargument name="bin" type="string" required="true" />
-	<cfargument name="quantity" type="string" required="false" default="1" />
-	<cfargument name="printerID" type="string" required="false" default="4" />
-
-	<cfset var loc = {} />
-
-	<cfsavecontent variable="loc.zplData">
-		<cfoutput>
-		<!--- start of label format --->
-		^XA
-
-		<!--- label home position --->
-		^LH0,0
-
-		<!--- label length --->
-		^LL1600
-
-		<!--- STOCKCODE header --->
-		^FO52,70 ^A0N,36 ^FDSTOCKCODE ^FS
-		<!--- underline --->
-		^FO42,110 ^GB748,0,2 ^FS
-		<!--- barcode --->
-		^FO52,160 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.stockcode)# ^FS
-		<!--- actual stockcode --->
-		^FO52,380 ^A0N,36 ^FB728,2 ^FD#trim(ARGUMENTS.stockcode)# ^FS
-
-		<!--- BIN header --->
-		^FO52,550 ^A0N,36 ^FDBIN ^FS
-		<!--- underline --->
-		^FO42,590 ^GB748,0,2 ^FS
-		<!--- barcode --->
-		^FO52,640 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.bin)# ^FS
-		<!--- actual bin --->
-		^FO52,860 ^A0N,36 ^FD#trim(ARGUMENTS.bin)# ^FS
-
-		<!--- print quantity --->
-		^PQ#ARGUMENTS.quantity#
-
-		<!--- print rate per second --->
-		^PR6
-
-		<!--- end of label format --->
-		^XZ
-		</cfoutput>
-	</cfsavecontent>
-
-	<cfset loc.result = SendToLabelPrinter(
-		printerID = ARGUMENTS.printerID,
-		zplData = loc.zplData
-		) />
-
-	<cfreturn loc.result />
 </cffunction>
 
 
