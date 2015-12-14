@@ -1,4 +1,4 @@
-<p>This is an example of how to print some ZPL data to a network as well as to a compuer-connected label printer.</p>
+<p>This is an example of how to print some ZPL data to a network as well as to a computer-connected label printer.</p>
 
 <cfsavecontent variable="zplData">
 <cfoutput>
