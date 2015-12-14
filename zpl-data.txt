@@ -1,0 +1,27 @@
+^XA
+^FX label home position ^FS
+^LH0,0
+^FX label length ^FS
+^LL1600
+^FX STOCKCODE header ^FS
+^FO52,70 ^A0N,36 ^FDSTOCKCODE ^FS
+^FX underline ^FS
+^FO42,110 ^GB748,0,2 ^FS
+^FX barcode ^FS
+^FO52,160 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.stockcode)# ^FS
+^FX actual stockcode ^FS
+^FO52,380 ^A0N,36 ^FB728,2 ^FD#trim(ARGUMENTS.stockcode)# ^FS
+^FXBIN header ^FS
+^FO52,550 ^A0N,36 ^FDBIN ^FS
+^FX underline ^FS
+^FO42,590 ^GB748,0,2 ^FS
+^FX barcode ^FS
+^FO52,640 ^BY1,1.0 ^B3N,,200,N ^FD#trim(ARGUMENTS.bin)# ^FS
+^FX actual bin ^FS
+^FO52,860 ^A0N,36 ^FD#trim(ARGUMENTS.bin)# ^FS
+^FX print quantity ^FS
+^PQ#ARGUMENTS.quantity#
+^FX print rate per second ^FS
+^PR6
+^FX end of label format ^FS
+^XZ
