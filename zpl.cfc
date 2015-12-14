@@ -36,7 +36,7 @@ public any function printToNetworkPrinter
 
 
 <cffunction name="printToConnectedPrinter" access="public" returntype="any" output="false">
-	<cfargument name="unc_path" type="string" required="false" default="" />
+	<cfargument name="uncPath" type="string" required="false" default="" />
 	<cfargument name="zpldata" type="string" required="true" default="" />
 	
 	<cfset var LOCAL = structNew() />
@@ -52,7 +52,7 @@ public any function printToNetworkPrinter
 	
 	<cftry>
 		
-		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.unc_path#" />
+		<cfset LOCAL.aArguments[1] = "#ARGUMENTS.uncPath#" />
 		<cfset LOCAL.aArguments[2] = "#LOCAL.zplDataAbsoluteFilePath#" />
 		
 		<cfexecute variable="batchScriptOutput"
